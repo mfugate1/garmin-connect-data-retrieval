@@ -7,5 +7,4 @@ RUN apk --no-cache -U add \
     py-pip \
     python3
 
-RUN pip3 install garminconnect
-RUN pip3 install pyyaml
+RUN pip3 install garminconnect pyyaml pymysql
