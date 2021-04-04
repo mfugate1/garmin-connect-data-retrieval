@@ -9,7 +9,11 @@ To run the script:
 
 `./garmin-connect-retrieval.py`
 
-If there is an issue while communicating with Garmin Connect, it will print an error message and return an exit code based on the exception that was caught
-
 I use the included Dockerfile as a jenkins worker to periodically run this script, but it could also be used as a standalone container to run the script
 
+Supported databases:
+- MySQL/MariaDB
+
+Upcoming features:
+- Support for gathering splits/sets from activities
+- If you have a request for a database to support, open an issue and I'll see what I can do
