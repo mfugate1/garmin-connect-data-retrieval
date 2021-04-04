@@ -1,0 +1,78 @@
+# By default, the script will look for a file called config.yaml to load
+# You can specify a different config file as the first argument to the script e.g. ./garmin-connect-retrieval.py my-config-file.yaml
+
+# Specify as many accounts as you'd like. Each entry in the database will include a column indicating the username
+garmin_users:
+  - username: 'user@email.com'
+    password: 'password-here'
+
+# Right now only mysql databases are supported, but you can specify as many as you like
+databases:
+  - type: mysql
+    host: myhost.com
+    user: garmin_user
+    password: db_password
+    database: fitness                  # If not specified, these are the default values that will be used
+    activity_table: garmin_activities  # If the database or table don't exist, they will be created automatically
+    splits_table: garmin_splits
+    sets_table: garmin_sets
+    default_col_type: FLOAT
+
+# Fields of each activity that should be recorded. You can override the default column type in the database,
+# set the units, or even run a transformation function on the value
+fields:
+  activityId:
+    db_col_type: BIGINT UNSIGNED NOT NULL PRIMARY KEY
+  activityName:
+    db_col_type: VARCHAR(64)
+  averageHR:
+    units: bpm
+  averageRunningCadenceInStepsPerMinute:
+    units: spm
+  averageSpeed:
+    transform: 26.8224 / value
+    units: minutes per mile
+  calories:
+    units: C
+  distance:
+    transform: value / 1609.34
+    units: miles
+  duration:
+    units: seconds
+  elevationGain:
+    units: meters
+  elevationLoss:
+    units: meters
+  lapCount:
+    db_col_type: TINYINT UNSIGNED
+  locationName:
+    db_col_type: VARCHAR(64)
+  maxHR:
+    units: bpm
+  maxRunningCadenceInStepsPerMinute:
+    units: spm
+  maxSpeed:
+    transform: 26.8224 / value
+    units: minutes per mile
+  startTimeLocal:
+    db_col_type: DATETIME
+  steps:
+    db_col_type: SMALLINT UNSIGNED
+  vO2MaxValue:
+  waterEstimated:
+    units: mL
+
+# Types of activities that should be recorded in the database
+# For activities that have splits or sets, you can set include_splits or include_sets to true to also grab that data
+activities:
+  cycling:
+  indoor_cycling:
+  running:
+    include_splits: true
+  strength_training:
+    include_sets: true
+  walking:
+    include_splits: true
+  yoga:
+      
+limit: 20

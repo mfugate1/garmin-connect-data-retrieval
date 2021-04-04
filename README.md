@@ -16,4 +16,6 @@ Supported databases:
 
 Upcoming features:
 - Support for gathering splits/sets from activities
+- Support for gathering all missing activities, not just the latest ones
+- Support for updating an activity that has changed since it was retrieved (currently just ignores that row)
 - If you have a request for a database to support, open an issue and I'll see what I can do
