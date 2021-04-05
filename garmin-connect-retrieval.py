@@ -8,7 +8,8 @@ import pymysql.cursors
 import sys
 import yaml
 
-from MysqlDriver import MysqlDriver
+from database_drivers.MysqlDriver import MysqlDriver
+from parsers.ActivityParser import parse_activity_to_row
 
 from datetime import date, timedelta
 
@@ -47,42 +48,32 @@ if 'databases' not in config:
 activity_data = []
 splits_data = []
 sets_data = []
+daily_stats_data = []
 
 for user in config['garmin_users']:
     client = Garmin(user['username'], user['password'])
     client.login()
     print('Connected to Garmin successfully!')
 
-    if 'limit' in config:
-        activities = client.get_activities(config.get('start', 0), config['limit'])
-    elif 'from_days_ago' in config:
+    # Activity retrieval
+    strategy = config['activity_config'].get('retrieval_strategy', 'by_limit')
+    if strategy == 'by_limit':
+        activities = client.get_activities(config['activity_config'].get('start', 0), config['activity_config'].get('limit', 2))
+    elif strategy == 'by_date':
         end = date.today()
-        start = end - timedelta(days = config['from_days_ago'])
+        start = end - timedelta(days = config['activity_config'].get('limit', 2))
         activities = client.get_activities_by_date(start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"))
     else:
-        print('Missing one of these config options: limit, from_days_ago')
-        sys.exit(1)
+        print(f'Unknown retrieval strategy for activities: {strategy}')
 
     for activity in activities:
-        if activity['activityType']['typeKey'] in config['activities']:
-            ad = {'activityType': activity['activityType']['typeKey'], 'user': user['username']}
-            for key, value in activity.items():
-                if key in config['fields']:
-                    k = key
-                    v = value
-                    if config['fields'][key] is not None and 'units' in config['fields'][key]:
-                        k = f"{key}_{config['fields'][key]['units'].replace(' ', '_')}"
-                    if config['fields'][key] is not None and value is not None and 'transform' in config['fields'][key]:
-                        pp.pprint('Transforming {}: [{}] with value {}'.format(key, config['fields'][key]['transform'], value))
-                        try:
-                            v = eval(config['fields'][key]['transform'])
-                        except ZeroDivisionError as ex:
-                            print('WARNING - Divide by zero error when transforming {}. Value will remain as {}'.format(key, value))
-                    ad[k] = v
-            activity_data.append(ad)
+        if activity['activityType']['typeKey'] in config['activity_config']['types']:
+            activity_data.append(parse_activity_to_row(activity, config['activity_config'], user['username']))
 
-config['fields']['user'] = {'db_col_type': 'VARCHAR(128)'}
-config['fields']['activityType'] = {'db_col_type': 'VARCHAR(32)'}
+pp.pprint(activity_data)
+
+config['activity_config']['fields']['user'] = {'db_col_type': 'VARCHAR(128)'}
+config['activity_config']['fields']['activityType'] = {'db_col_type': 'VARCHAR(32)'}
 
 for db_config in config['databases']:
     if db_config['type'] == 'mysql':

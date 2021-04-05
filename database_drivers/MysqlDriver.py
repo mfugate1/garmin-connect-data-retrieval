@@ -1,4 +1,4 @@
-from DatabaseDriver import DatabaseDriver
+from database_drivers.DatabaseDriver import DatabaseDriver
 import pymysql.cursors
 
 class MysqlDriver(DatabaseDriver):
@@ -23,7 +23,7 @@ class MysqlDriver(DatabaseDriver):
         conn.close()
 
         table_cols = {}
-        for field, field_config in config['fields'].items():
+        for field, field_config in config['activity_config']['fields'].items():
             if field_config is not None:
                 col_type = field_config['db_col_type'] if 'db_col_type' in field_config else db_config['default_col_type']
                 field_units = '_' + field_config['units'].replace(' ', '_') if 'units' in field_config else ''
