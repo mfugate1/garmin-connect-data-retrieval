@@ -18,61 +18,86 @@ databases:
     sets_table: garmin_sets
     default_col_type: FLOAT
 
-# Fields of each activity that should be recorded. You can override the default column type in the database,
-# set the units, or even run a transformation function on the value
-fields:
-  activityId:
-    db_col_type: BIGINT UNSIGNED NOT NULL PRIMARY KEY
-  activityName:
-    db_col_type: VARCHAR(64)
-  averageHR:
-    units: bpm
-  averageRunningCadenceInStepsPerMinute:
-    units: spm
-  averageSpeed:
-    transform: 26.8224 / value
-    units: minutes per mile
-  calories:
-    units: C
-  distance:
-    transform: value / 1609.34
-    units: miles
-  duration:
-    units: seconds
-  elevationGain:
-    units: meters
-  elevationLoss:
-    units: meters
-  lapCount:
-    db_col_type: TINYINT UNSIGNED
-  locationName:
-    db_col_type: VARCHAR(64)
-  maxHR:
-    units: bpm
-  maxRunningCadenceInStepsPerMinute:
-    units: spm
-  maxSpeed:
-    transform: 26.8224 / value
-    units: minutes per mile
-  startTimeLocal:
-    db_col_type: DATETIME
-  steps:
-    db_col_type: SMALLINT UNSIGNED
-  vO2MaxValue:
-  waterEstimated:
-    units: mL
+daily_stats_config:
+  retrieval_strategy: by_limit
+  table: garmin_daily_stats
+  limit: 5
+  fields:
+    totalKilocalories:
+      units: C
+    totalSteps:
+    dailyStepGoal:
+    calendarDate:
+      db_col_type: DATE PRIMARY KEY
+    highlyActiveSeconds:
+      db_col_type: MEDIUMINT UNSIGNED
+    activeSeconds:
+      db_col_type: MEDIUMINT UNSIGNED
+    sedentarySeconds:
+      db_col_type: MEDIUMINT UNSIGNED
+    moderateIntensityMinutes:
+      db_col_type: MEDIUMINT UNSIGNED
+    vigorousIntensityMinutes:
+      db_col_type: MEDIUMINT UNSIGNED
+    minHeartRate:
+      db_col_type: TINYINT UNSIGNED
+    maxHeartRate:
+      db_col_type: TINYINT UNSIGNED
+    restingHeartRate:
+      db_col_type: TINYINT UNSIGNED
 
-# Types of activities that should be recorded in the database
-# For activities that have splits or sets, you can set include_splits or include_sets to true to also grab that data
-activities:
-  cycling:
-  indoor_cycling:
-  running:
-    include_splits: true
-  strength_training:
-    include_sets: true
-  walking:
-    include_splits: true
-  yoga:
-      
-limit: 20
+activity_config:
+  retrieval_strategy: by_limit
+  limit: 2
+  table: garmin_activities
+  types:
+    cycling:
+    indoor_cycling:
+    running:
+      include_splits: true
+    strength_training:
+      include_sets: true
+    walking:
+      include_splits: true
+    yoga:
+  fields:
+    activityId:
+      db_col_type: BIGINT UNSIGNED NOT NULL PRIMARY KEY
+    activityName:
+      db_col_type: VARCHAR(64)
+    averageHR:
+      units: bpm
+    averageRunningCadenceInStepsPerMinute:
+      units: spm
+    averageSpeed:
+      transform: 26.8224 / value
+      units: minutes per mile
+    calories:
+      units: C
+    distance:
+      transform: value / 1609.34
+      units: miles
+    duration:
+      units: seconds
+    elevationGain:
+      units: meters
+    elevationLoss:
+      units: meters
+    lapCount:
+      db_col_type: TINYINT UNSIGNED
+    locationName:
+      db_col_type: VARCHAR(64)
+    maxHR:
+      units: bpm
+    maxRunningCadenceInStepsPerMinute:
+      units: spm
+    maxSpeed:
+      transform: 26.8224 / value
+      units: minutes per mile
+    startTimeLocal:
+      db_col_type: DATETIME
+    steps:
+      db_col_type: SMALLINT UNSIGNED
+    vO2MaxValue:
+    waterEstimated:
+      units: mL
