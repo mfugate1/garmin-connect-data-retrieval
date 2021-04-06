@@ -9,7 +9,7 @@ import sys
 import yaml
 
 from database_drivers.MysqlDriver import MysqlDriver
-from parsers.ActivityParser import parse_activity_to_row
+from parsers.Parser import parse_activity_to_row, parse_row
 
 from datetime import date, timedelta
 
@@ -19,6 +19,9 @@ from garminconnect import (
     GarminConnectTooManyRequestsError,
     GarminConnectAuthenticationError,
 )
+
+DEFAULT_ACTIVITY_TABLE = 'garmin_activities'
+DEFAULT_DAILY_STATS_TABLE = 'garmin_daily_stats'
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -70,7 +73,19 @@ for user in config['garmin_users']:
         if activity['activityType']['typeKey'] in config['activity_config']['types']:
             activity_data.append(parse_activity_to_row(activity, config['activity_config'], user['username']))
 
+    # Daily stat retrieval
+    strategy = config['daily_stats_config'].get('retrieval_strategy', 'by_limit')
+    if strategy == 'by_limit':
+        day = date.today()
+        for i in range(config['daily_stats_config'].get('limit', 5)):
+            day = date.today() - timedelta(days = i)
+            print(f'Gathering daily stats for {day}')
+            daily_stats_data.append(parse_row(client.get_stats(day.strftime('%Y-%m-%d')), config['daily_stats_config'], user['username']))
+    else:
+        print(f'Unknown retrieval strategy for daily stats: {strategy}')
+
 pp.pprint(activity_data)
+pp.pprint(daily_stats_data)
 
 config['activity_config']['fields']['user'] = {'db_col_type': 'VARCHAR(128)'}
 config['activity_config']['fields']['activityType'] = {'db_col_type': 'VARCHAR(32)'}
@@ -79,5 +94,6 @@ for db_config in config['databases']:
     if db_config['type'] == 'mysql':
         driver = MysqlDriver(db_config, config)
 
-    driver.insert_data(activity_data)
+    driver.insert_data(activity_data, config['activity_config'].get('table', DEFAULT_ACTIVITY_TABLE))
+    driver.insert_data(daily_stats_data, config['daily_stats_config'].get('table', DEFAULT_DAILY_STATS_TABLE))
 

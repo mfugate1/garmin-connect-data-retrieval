@@ -1,6 +1,11 @@
 def parse_activity_to_row(activity, config, user):
-    row = {'activityType': activity['activityType']['typeKey'], 'user': user}
-    for key, value in activity.items():
+    row = parse_row(activity, config, user)
+    row['activityType'] = activity['activityType']['typeKey']
+    return row
+
+def parse_row(item, config, user):
+    row = {'user': user}
+    for key, value in item.items():
         if key in config['fields']:
             k = key
             v = value

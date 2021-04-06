@@ -7,5 +7,5 @@ class DatabaseDriver(ABC):
         pass
 
     @abstractmethod
-    def insert_data(self, data, fields):
+    def insert_data(self, data):
         pass
