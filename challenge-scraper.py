@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 import pprint
+import requests
 import yaml
 
+from datetime import datetime
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -83,7 +85,7 @@ for user in config['garmin_users']:
 
                 print('Getting the challenge rules')
                 rules = driver.find_elements_by_xpath("//p[contains(@class, 'challenges_badgeChallengeRules')]")
-                challenge['dateRange'] = rules[0].text
+                challenge['date_range'] = rules[0].text
                 challenge['description'] = rules[1].text
 
                 print('Getting the challenge image url')
@@ -125,5 +127,51 @@ for user in config['garmin_users']:
     finally:
         driver.quit()
 
-print(f'Found {len(challenges)} challenges')
-pp.pprint(challenges)
+for challenge in challenges:
+    challenge['state'] = 'active' if 'progress_raw' in challenge else 'inactive'
+
+    dates = challenge['date_range'].split(' to ')
+    challenge['start_date'] = datetime.strptime(dates[0], '%b %d, %Y')
+    challenge['end_date'] = datetime.strptime(dates[1], '%b %d, %Y')
+
+    for activity_type in ['run', 'cycling', 'walking', 'yoga', 'steps']:
+        if activity_type in challenge['description'].lower() or activity_type in challenge['name'].lower():
+            challenge['activity_type'] = activity_type
+
+    if 'activity_type' not in challenge:
+        challenge['activity_type'] = 'unknown'
+
+    if challenge['activity_type'] == 'run':
+        challenge['icon'] = 'mdi:run'
+    elif challenge['activity_type'] == 'cycling':
+        challenge['icon'] = 'mdi:bike'
+    elif challenge['activity_type'] == 'walking':
+        challenge['icon'] = 'mdi:walk'
+    elif challenge['activity_type'] == 'yoga':
+        challenge['icon'] = 'mdi:yoga'
+    elif challenge['activity_type'] == 'steps':
+        challenge['icon'] = 'mdi:shoe-print'
+
+    if 'progress_raw' in challenge:
+        challenge['progress'] = challenge['progress_raw'].split(' / ')[0]
+        challenge['goal'] = challenge['progress_raw'].split(' / ')[1].split()[0]
+        challenge['units'] = challenge['progress_raw'].split(' / ')[1].split()[1]
+
+#print(f'Found {len(challenges)} challenges')
+#pp.pprint(challenges)
+
+if 'homeassistant' in config and 'challenges_config' in config:
+    sorted_challenges = []
+
+    sorted_challenges += sorted([x for x in challenges if x['state'] == 'active'], key=lambda c: c['end_date'])
+    sorted_challenges += [x for x in challenges if x['state'] == 'inactive']
+
+    challenge_data = {}
+    for i, challenge in enumerate(sorted_challenges, 1):
+        challenge['start_date'] = datetime.strftime(challenge['start_date'], '%Y-%m-%d')
+        challenge['end_date'] = datetime.strftime(challenge['end_date'], '%Y-%m-%d')
+        challenge_data[f'challenge_{str(i).zfill(2)}'] = challenge
+
+    pp.pprint(challenge_data)
+
+    requests.post(f'{config["homeassistant"]["url"]}/{config["challenges_config"]["homeassistant"]["webhook"]}', json=challenge_data)
