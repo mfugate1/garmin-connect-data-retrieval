@@ -10,6 +10,7 @@ import yaml
 
 from database_drivers.MysqlDriver import MysqlDriver
 from parsers.Parser import parse_activity_to_row, parse_row
+from utils.config import load_config
 
 from datetime import date, timedelta
 
@@ -25,20 +26,7 @@ DEFAULT_DAILY_STATS_TABLE = 'garmin_daily_stats'
 
 pp = pprint.PrettyPrinter(indent=4)
 
-if len(sys.argv) > 1:
-    config_file = sys.argv[1]
-else:
-    if os.path.exists('config.yaml'):
-        config_file = 'config.yaml'
-    else:
-        config_file = None
-
-if config_file is None:
-    print('No config file specified and default config.yaml not found')
-    sys.exit(1)
-else:
-    with open(config_file, 'r') as file:
-        config = yaml.load(file, Loader=yaml.SafeLoader)
+config = load_config()
 
 if 'garmin_users' not in config:
     print('No users specified')
