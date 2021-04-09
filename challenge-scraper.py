@@ -153,8 +153,8 @@ for challenge in challenges:
         challenge['icon'] = 'mdi:shoe-print'
 
     if 'progress_raw' in challenge:
-        challenge['progress'] = challenge['progress_raw'].split(' / ')[0]
-        challenge['goal'] = challenge['progress_raw'].split(' / ')[1].split()[0]
+        challenge['current_progress'] = float(challenge['progress_raw'].split(' / ')[0].replace(',', ''))
+        challenge['goal'] = float(challenge['progress_raw'].split(' / ')[1].split()[0].replace(',', ''))
         challenge['units'] = challenge['progress_raw'].split(' / ')[1].split()[1]
 
 #print(f'Found {len(challenges)} challenges')
