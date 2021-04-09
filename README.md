@@ -14,6 +14,11 @@ I use the included Dockerfile as a jenkins worker to periodically run this scrip
 Supported databases:
 - MySQL/MariaDB
 
+# Challenge scraper
+Script to get challenges directly from the garmin connect website (since the API doesn't seem to give any way to retrieve them)
+Requires selenium
+`./challenge-scraper.py`
+
 Upcoming features:
 - Support for gathering splits/sets from activities
 - Support for gathering all missing activities, not just the latest ones
