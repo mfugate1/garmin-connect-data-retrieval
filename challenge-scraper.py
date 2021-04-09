@@ -128,19 +128,36 @@ for user in config['garmin_users']:
         driver.quit()
 
 for challenge in challenges:
-    if 'progress_raw' in challenge:
-        challenge['current_progress'] = float(challenge['progress_raw'].split(' / ')[0].replace(',', ''))
-        challenge['goal'] = float(challenge['progress_raw'].split(' / ')[1].split()[0].replace(',', ''))
-        challenge['units'] = challenge['progress_raw'].split(' / ')[1].split()[1]
-        challenge['state'] = 'complete' if challenge['current_progress'] >= challenge['goal'] else 'active'
-    else:
-        challenge['state'] = 'inactive'
-
     dates = challenge['date_range'].split(' to ')
     challenge['start_date'] = datetime.strptime(dates[0], '%b %d, %Y')
     challenge['end_date'] = datetime.strptime(dates[1], '%b %d, %Y')
 
-    for activity_type in ['run', 'cycling', 'walking', 'yoga', 'steps']:
+    if 'progress_raw' in challenge:
+        challenge['type'] = 'cumulative'
+        challenge['current_progress_display'] = challenge['progress_raw'].split(' / ')[0]
+        challenge['current_progress'] = float(challenge['current_progress_display'].replace(',', ''))
+        challenge['goal'] = float(challenge['progress_raw'].split(' / ')[1].split()[0].replace(',', ''))
+        challenge['units'] = challenge['progress_raw'].split(' / ')[1].split()[1]
+        if challenge['current_progress'] >= challenge['goal']:
+            challenge['state'] = 'complete'
+    elif 'Complete' in challenge['description']:
+        challenge['type'] = 'one_time_activity'
+        for token in challenge['description'].split():
+            if token[:1].isdigit():
+                challenge['goal'] = token.split('-')[0]
+                challenge['units'] = token.split('-')[1]
+                break
+
+    if 'state' not in challenge:
+        if datetime.now() >= challenge['start_date'] and datetime.now() <= challenge['end_date']:
+            challenge['state'] = 'active'
+        else:
+            challenge['state'] = 'inactive'
+
+    challenge['start_date'] = datetime.strftime(challenge['start_date'], '%Y-%m-%d')
+    challenge['end_date'] = datetime.strftime(challenge['end_date'], '%Y-%m-%d')
+
+    for activity_type in ['run', 'cycling', 'walk', 'yoga', 'steps']:
         if activity_type in challenge['description'].lower() or activity_type in challenge['name'].lower():
             challenge['activity_type'] = activity_type
 
@@ -149,10 +166,12 @@ for challenge in challenges:
 
     if challenge['activity_type'] == 'run':
         challenge['icon'] = 'mdi:run'
+        challenge['activity_type'] = 'running'
     elif challenge['activity_type'] == 'cycling':
         challenge['icon'] = 'mdi:bike'
-    elif challenge['activity_type'] == 'walking':
+    elif challenge['activity_type'] == 'walk':
         challenge['icon'] = 'mdi:walk'
+        challenge['activity_type'] = 'walking'
     elif challenge['activity_type'] == 'yoga':
         challenge['icon'] = 'mdi:yoga'
     elif challenge['activity_type'] == 'steps':
@@ -174,8 +193,6 @@ if 'homeassistant' in config and 'challenges_config' in config:
 
     challenge_data = {}
     for i, challenge in enumerate(sorted_challenges, 1):
-        challenge['start_date'] = datetime.strftime(challenge['start_date'], '%Y-%m-%d')
-        challenge['end_date'] = datetime.strftime(challenge['end_date'], '%Y-%m-%d')
         challenge_data[f'challenge_{str(i).zfill(2)}'] = challenge
 
     requests.post(f'{config["homeassistant"]["url"]}/{config["challenges_config"]["homeassistant"]["webhook"]}', json=challenge_data)
