@@ -193,6 +193,4 @@ if 'homeassistant' in config and 'challenges_config' in config:
 
     challenge_data = {}
     for i, challenge in enumerate(sorted_challenges, 1):
-        challenge_data[f'challenge_{str(i).zfill(2)}'] = challenge
-
-    requests.post(f'{config["homeassistant"]["url"]}/{config["challenges_config"]["homeassistant"]["webhook"]}', json=challenge_data)
+        requests.post(f'{config["homeassistant"]["url"]}/{config["challenges_config"]["homeassistant"]["webhook"]}{str(i).zfill(2)}', json=challenge)
