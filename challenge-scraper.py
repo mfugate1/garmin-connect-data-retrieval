@@ -128,7 +128,13 @@ for user in config['garmin_users']:
         driver.quit()
 
 for challenge in challenges:
-    challenge['state'] = 'active' if 'progress_raw' in challenge else 'inactive'
+    if 'progress_raw' in challenge:
+        challenge['current_progress'] = float(challenge['progress_raw'].split(' / ')[0].replace(',', ''))
+        challenge['goal'] = float(challenge['progress_raw'].split(' / ')[1].split()[0].replace(',', ''))
+        challenge['units'] = challenge['progress_raw'].split(' / ')[1].split()[1]
+        challenge['state'] = 'complete' if challenge['current_progress'] >= challenge['goal'] else 'active'
+    else:
+        challenge['state'] = 'inactive'
 
     dates = challenge['date_range'].split(' to ')
     challenge['start_date'] = datetime.strptime(dates[0], '%b %d, %Y')
@@ -157,8 +163,8 @@ for challenge in challenges:
         challenge['goal'] = float(challenge['progress_raw'].split(' / ')[1].split()[0].replace(',', ''))
         challenge['units'] = challenge['progress_raw'].split(' / ')[1].split()[1]
 
-#print(f'Found {len(challenges)} challenges')
-#pp.pprint(challenges)
+print(f'Found {len(challenges)} challenges')
+pp.pprint(challenges)
 
 if 'homeassistant' in config and 'challenges_config' in config:
     sorted_challenges = []
@@ -171,7 +177,5 @@ if 'homeassistant' in config and 'challenges_config' in config:
         challenge['start_date'] = datetime.strftime(challenge['start_date'], '%Y-%m-%d')
         challenge['end_date'] = datetime.strftime(challenge['end_date'], '%Y-%m-%d')
         challenge_data[f'challenge_{str(i).zfill(2)}'] = challenge
-
-    pp.pprint(challenge_data)
 
     requests.post(f'{config["homeassistant"]["url"]}/{config["challenges_config"]["homeassistant"]["webhook"]}', json=challenge_data)
