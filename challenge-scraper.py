@@ -183,6 +183,10 @@ for challenge in challenges:
         challenge['goal'] = float(challenge['progress_raw'].split(' / ')[1].split()[0].replace(',', ''))
         challenge['units'] = challenge['progress_raw'].split(' / ')[1].split()[1]
 
+    # For one time activity challenges, if complete, set current_progress = goal
+    if 'current_progress' not in challenge and challenge['state'] == 'complete':
+        challenge['current_progress'] = challenge['goal']
+
 print(f'Found {len(challenges)} challenges')
 pp.pprint(challenges)
 
