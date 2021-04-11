@@ -89,7 +89,10 @@ for user in config['garmin_users']:
                 challenge['description'] = rules[1].text
 
                 print('Getting the challenge image url')
-                challenge['image_url'] = driver.find_element_by_xpath("//img[@role='presentation']").get_attribute('src')
+                element = driver.find_element_by_xpath("//img[@role='presentation']").get_attribute('src')
+                challenge['image_url'] = element.get_attribute('src')
+                if not element.get_attribute('class').startsWith('challenges_badgeNotAchieved'):
+                    challenge['state'] = 'complete'
 
                 print('Getting the challenge progress')
                 # For challenges that haven't started yet, this won't exist. That's ok :)
@@ -138,8 +141,6 @@ for challenge in challenges:
         challenge['current_progress'] = float(challenge['current_progress_display'].replace(',', ''))
         challenge['goal'] = float(challenge['progress_raw'].split(' / ')[1].split()[0].replace(',', ''))
         challenge['units'] = challenge['progress_raw'].split(' / ')[1].split()[1]
-        if challenge['current_progress'] >= challenge['goal']:
-            challenge['state'] = 'complete'
     elif 'Complete' in challenge['description']:
         challenge['type'] = 'one_time_activity'
         for token in challenge['description'].split():
