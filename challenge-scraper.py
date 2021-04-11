@@ -89,7 +89,7 @@ for user in config['garmin_users']:
                 challenge['description'] = rules[1].text
 
                 print('Getting the challenge image url')
-                element = driver.find_element_by_xpath("//img[@role='presentation']").get_attribute('src')
+                element = driver.find_element_by_xpath("//img[@role='presentation']")
                 challenge['image_url'] = element.get_attribute('src')
                 if not element.get_attribute('class').startsWith('challenges_badgeNotAchieved'):
                     challenge['state'] = 'complete'
