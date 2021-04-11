@@ -74,7 +74,7 @@ for user in config['garmin_users']:
                 # Navigate to the details page for this badge to collect challenge information
                 print(f'Navigating to challenge {i}')
                 get_challenge_elements(driver)[i].find_element_by_class_name('challenge-card-body').find_element_by_class_name('view-detail').click()
-                wait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(@class, 'challenges_badgeChallengeName')]")))
+                wait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//h2[contains(@class, 'challenges_badgeChallengeName')]")))
 
                 print(f'Current URL: {driver.current_url}')
 
@@ -99,7 +99,7 @@ for user in config['garmin_users']:
                 try:
                     challenge['progress_raw'] = driver.find_element_by_class_name('badge-progress-label').text
                 except NoSuchElementException: 
-                    print(f'No progress label, challenge probably didn\'t start yet: {challenge["name"]}')
+                    pass
 
                 challenges.append(challenge)
 
