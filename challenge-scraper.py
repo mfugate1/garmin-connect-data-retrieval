@@ -201,7 +201,7 @@ if 'homeassistant' in config and 'challenges_config' in config:
     url = f'{config["homeassistant"]["url"]}/{config["challenges_config"]["homeassistant"]["webhook_prefix"]}'
     for i in range(config['homeassistant']['count']):
         if i < len(sorted_challenges):
-            requests.post(url + str(i + 1).zfill(2), json=challenge)
+            requests.post(url + str(i + 1).zfill(2), json=sorted_challenges[i])
         else:
             requests.post(url + str(i + 1).zfill(2), json={'state': 'unknown'})
         
