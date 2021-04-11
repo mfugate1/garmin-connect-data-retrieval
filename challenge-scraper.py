@@ -78,7 +78,7 @@ for user in config['garmin_users']:
 
                 print(f'Current URL: {driver.current_url}')
 
-                challenge = {'user': user['username']}
+                challenge = {'user': user['username'], 'url': driver.current_url}
 
                 print('Getting the challenge name')
                 challenge['name'] = driver.find_element_by_xpath("//h2[contains(@class, 'challenges_badgeChallengeName')]").text
