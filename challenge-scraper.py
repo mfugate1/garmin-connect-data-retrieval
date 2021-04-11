@@ -197,5 +197,11 @@ if 'homeassistant' in config and 'challenges_config' in config:
     sorted_challenges += [x for x in challenges if x['state'] == 'inactive']
 
     challenge_data = {}
-    for i, challenge in enumerate(sorted_challenges, 1):
-        requests.post(f'{config["homeassistant"]["url"]}/{config["challenges_config"]["homeassistant"]["webhook"]}{str(i).zfill(2)}', json=challenge)
+
+    url = f'{config["homeassistant"]["url"]}/{config["challenges_config"]["homeassistant"]["webhook_prefix"]}'
+    for i in range(config['homeassistant']['count']):
+        if i < len(sorted_challenges):
+            requests.post(url + str(i + 1).zfill(2), json=challenge)
+        else:
+            requests.post(url + str(i + 1).zfill(2), json={'state': 'unknown'})
+        
