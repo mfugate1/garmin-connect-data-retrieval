@@ -189,7 +189,7 @@ pp.pprint(challenges)
 if 'homeassistant' in config and 'challenges_config' in config:
     sorted_challenges = []
 
-    sorted_challenges += sorted([x for x in challenges if x['state'] == 'active'], key=lambda c: c['end_date'])
+    sorted_challenges += sorted([x for x in challenges if x['state'] != 'inactive'], key=lambda c: c['end_date'])
     sorted_challenges += [x for x in challenges if x['state'] == 'inactive']
 
     challenge_data = {}
