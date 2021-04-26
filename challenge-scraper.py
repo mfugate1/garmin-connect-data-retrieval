@@ -113,9 +113,12 @@ for user in config['garmin_users']:
                     driver.find_element_by_xpath('//a[@href="#" and @title="Next"]').click()
                     wait_for_challenges(driver)
 
-
-            current_page = int(driver.find_element_by_id('current-page').get_attribute('value'))
-            last_page = int(driver.find_element_by_xpath('//label[@for="current-page"]').text.split()[1])
+            try:
+                current_page = int(driver.find_element_by_id('current-page').get_attribute('value'))
+                last_page = int(driver.find_element_by_xpath('//label[@for="current-page"]').text.split()[1])
+            except NoSuchElementException:
+                print('No pagination elements, collected all the available challenges')
+                break
 
             if current_page != last_page:
                 print(f'On page {current_page} of {last_page}, going to next page')
