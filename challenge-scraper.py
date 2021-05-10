@@ -161,7 +161,7 @@ for challenge in challenges:
     challenge['start_date'] = datetime.strftime(challenge['start_date'], '%Y-%m-%d')
     challenge['end_date'] = datetime.strftime(challenge['end_date'], '%Y-%m-%d')
 
-    for activity_type in ['run', 'cycling', 'walk', 'yoga', 'steps']:
+    for activity_type in ['run', 'cycling', 'walk', 'yoga', 'steps', 'strength']:
         if activity_type in challenge['description'].lower() or activity_type in challenge['name'].lower():
             challenge['activity_type'] = activity_type
 
@@ -180,11 +180,15 @@ for challenge in challenges:
         challenge['icon'] = 'mdi:yoga'
     elif challenge['activity_type'] == 'steps':
         challenge['icon'] = 'mdi:shoe-print'
+    elif challenge['activity_type'] == 'strength':
+        challenge['icon'] = 'mdi:weight-lifter'
 
     if 'progress_raw' in challenge:
         challenge['current_progress'] = float(challenge['progress_raw'].split(' / ')[0].replace(',', ''))
         challenge['goal'] = float(challenge['progress_raw'].split(' / ')[1].split()[0].replace(',', ''))
         challenge['units'] = challenge['progress_raw'].split(' / ')[1].split()[1]
+
+    pp.pprint(challenge)
 
     # For one time activity challenges, if complete, set current_progress = goal
     if 'current_progress' not in challenge and challenge['state'] == 'complete':
