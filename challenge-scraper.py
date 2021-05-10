@@ -144,12 +144,17 @@ for challenge in challenges:
         challenge['current_progress'] = float(challenge['current_progress_display'].replace(',', ''))
         challenge['goal'] = float(challenge['progress_raw'].split(' / ')[1].split()[0].replace(',', ''))
         challenge['units'] = challenge['progress_raw'].split(' / ')[1].split()[1]
-    elif 'Complete' in challenge['description']:
+    elif 'Complete' in challenge['description'] or ' in one ' in challenge['description']:
         challenge['type'] = 'one_time_activity'
-        for token in challenge['description'].split():
+        desc_tokens = challenge['description'].split()
+        for i, token in enumerate(desc_tokens):
             if token[:1].isdigit():
-                challenge['goal'] = token.split('-')[0]
-                challenge['units'] = token.split('-')[1]
+                if '-' in token:
+                    challenge['goal'] = token.split('-')[0]
+                    challenge['units'] = token.split('-')[1]
+                else:
+                    challenge['goal'] = token
+                    challenge['units'] = desc_tokens[i + 1]
                 break
 
     if 'state' not in challenge:
@@ -187,8 +192,6 @@ for challenge in challenges:
         challenge['current_progress'] = float(challenge['progress_raw'].split(' / ')[0].replace(',', ''))
         challenge['goal'] = float(challenge['progress_raw'].split(' / ')[1].split()[0].replace(',', ''))
         challenge['units'] = challenge['progress_raw'].split(' / ')[1].split()[1]
-
-    pp.pprint(challenge)
 
     # For one time activity challenges, if complete, set current_progress = goal
     if 'current_progress' not in challenge and challenge['state'] == 'complete':
