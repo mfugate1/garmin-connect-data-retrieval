@@ -31,6 +31,7 @@ for user in config['garmin_users']:
         chrome_opts.add_argument('start-maximized')
         chrome_opts.add_argument('--disable-dev-shm-usage')
         chrome_opts.add_argument('--window-size=1420,1080')
+        chrome_opts.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
 
         driver = webdriver.Chrome(options=chrome_opts)
 
