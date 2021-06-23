@@ -14,5 +14,6 @@ node('python3 && garmin-connect && selenium') {
                 attempts++
                 if (attempts > 20) break
             }
+        }
     }
 }
