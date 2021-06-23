@@ -5,6 +5,14 @@ node('python3 && garmin-connect && selenium') {
         sh 'python3 garmin-connect-retrieval.py'
     }
     if (params.retrieveChallenges) {
-        sh 'python3 challenge-scraper.py'
+        int attempts = 0
+        while (true) {
+            try {
+                sh 'python3 challenge-scraper.py'
+                break
+            } catch (Exception ex) {
+                attempts++
+                if (attempts > 20) break
+            }
     }
 }
